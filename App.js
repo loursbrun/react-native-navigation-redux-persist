@@ -1,21 +1,34 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { Component } from 'react';
+import { createStore, combineReducers, applyMiddleware } from 'redux'
+import { Provider } from 'react-redux'
+import logger from 'redux-logger'
+import navigation from './src/reducer'
+import { persistStore, persistCombineReducers } from 'redux-persist'
+import storage from 'redux-persist/lib/storage' // default: localStorage if web, AsyncStorage if react-native
 
-export default class App extends React.Component {
+import Navigator from './src/Navigator'
+
+const config = {
+  key: 'primary',
+  storage
+ }
+
+const reducer = persistCombineReducers(config, { navigation })
+const store = createStore(reducer, applyMiddleware(logger))
+persistStore(
+  store,
+  null,
+  () => {
+    store.getState() // if you want to get restoredState
+  }
+)
+
+export default class App extends Component {
   render() {
     return (
-      <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
-      </View>
+      <Provider store={store}>
+        <Navigator />
+      </Provider>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
